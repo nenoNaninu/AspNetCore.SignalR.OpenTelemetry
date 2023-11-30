@@ -1,0 +1,28 @@
+name: build-and-test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  DOTNET_VERSION: "8.0.x"
+  DOTNET_NOLOGO: true
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore dependencies
+        run: dotnet restore ./AspNetCore.SignalR.OpenTelemetry.sln
+
+      - name: Build AspNetCore.SignalR.OpenTelemetry.csproj
+        run: dotnet build ./src/AspNetCore.SignalR.OpenTelemetry/AspNetCore.SignalR.OpenTelemetry.csproj --no-restore
