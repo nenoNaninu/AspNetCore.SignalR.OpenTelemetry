@@ -11,7 +11,8 @@ internal static class HubActivitySource
 
     internal static Activity? StartInvocationActivity(string hubName, string methodName)
     {
-        var activity = ActivitySource.CreateActivity($"{hubName}.{methodName}", ActivityKind.Internal);
+        //https://opentelemetry.io/docs/specs/semconv/rpc/rpc-spans/#span-name
+        var activity = ActivitySource.CreateActivity($"{hubName}/{methodName}", ActivityKind.Internal);
 
         activity?.SetTag("signalr.hub", hubName);
         activity?.SetTag("signalr.method", methodName);
