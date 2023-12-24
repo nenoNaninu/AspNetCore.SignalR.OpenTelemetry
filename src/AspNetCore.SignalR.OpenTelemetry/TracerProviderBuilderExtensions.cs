@@ -16,7 +16,7 @@ public static class TracerProviderBuilderExtensions
 
 public static class SignalRServerBuilderExtensions
 {
-    public static void AddHubInstrumentation(this ISignalRServerBuilder builder)
+    public static ISignalRServerBuilder AddHubInstrumentation(this ISignalRServerBuilder builder)
     {
         builder.Services.TryAddSingleton<HubInstrumentationFilter>();
 
@@ -24,5 +24,7 @@ public static class SignalRServerBuilderExtensions
         {
             options.AddFilter<HubInstrumentationFilter>();
         });
+
+        return builder;
     }
 }
