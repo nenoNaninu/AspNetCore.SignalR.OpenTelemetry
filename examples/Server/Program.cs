@@ -1,5 +1,4 @@
 using AspNetCore.SignalR.OpenTelemetry;
-using Microsoft.AspNetCore.SignalR;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Server.Hubs;
