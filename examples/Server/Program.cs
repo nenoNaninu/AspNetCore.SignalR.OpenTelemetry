@@ -1,5 +1,4 @@
 using AspNetCore.SignalR.OpenTelemetry;
-using Microsoft.AspNetCore.SignalR;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Server.Hubs;
@@ -16,10 +15,8 @@ builder.Logging.AddSimpleConsole(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddSignalR(options =>
-{
-    options.AddFilter<HubInstrumentationFilter>();
-});
+builder.Services.AddSignalR()
+    .AddHubInstrumentation();
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(builder =>

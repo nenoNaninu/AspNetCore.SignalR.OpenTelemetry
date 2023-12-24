@@ -12,9 +12,9 @@ public sealed class HubInstrumentationFilter : IHubFilter
 {
     private readonly ILogger _logger;
 
-    public HubInstrumentationFilter(ILogger<HubInstrumentationFilter> logger)
+    public HubInstrumentationFilter(ILoggerFactory loggerFactory)
     {
-        _logger = logger;
+        _logger = loggerFactory.CreateLogger("AspNetCore.SignalR.Logging");
     }
 
     public async ValueTask<object?> InvokeMethodAsync(
