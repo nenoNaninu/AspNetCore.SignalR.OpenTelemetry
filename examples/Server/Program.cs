@@ -16,10 +16,8 @@ builder.Logging.AddSimpleConsole(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddSignalR(options =>
-{
-    options.AddFilter<HubInstrumentationFilter>();
-});
+builder.Services.AddSignalR()
+    .AddHubInstrumentation();
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(builder =>
