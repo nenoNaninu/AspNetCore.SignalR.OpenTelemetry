@@ -21,10 +21,8 @@ dotnet add package AspNetCore.SignalR.OpenTelemetry
 ```cs
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddSignalR(options =>
-{
-    options.AddFilter<HubInstrumentationFilter>(); // <- Add this!
-});
+builder.Services.AddSignalR()
+    .AddHubInstrumentation(); // <- Add this!
 
 builder.Services.AddOpenTelemetry()
     .ConfigureResource(builder =>
