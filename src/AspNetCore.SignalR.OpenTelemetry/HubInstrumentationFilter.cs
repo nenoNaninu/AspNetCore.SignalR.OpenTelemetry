@@ -14,7 +14,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
 
     public HubInstrumentationFilter(ILoggerFactory loggerFactory)
     {
-        _logger = loggerFactory.CreateLogger("AspNetCore.SignalR.Logging.HubLogging");
+        _logger = loggerFactory.CreateLogger("AspNetCore.SignalR.Logging.HubLoggingFilter");
     }
 
     public async ValueTask<object?> InvokeMethodAsync(
