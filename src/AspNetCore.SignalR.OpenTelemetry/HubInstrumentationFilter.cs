@@ -49,32 +49,68 @@ public sealed class HubInstrumentationFilter : IHubFilter
         }
     }
 
-    public Task OnConnectedAsync(HubLifetimeContext context, Func<HubLifetimeContext, Task> next)
+    public async Task OnConnectedAsync(HubLifetimeContext context, Func<HubLifetimeContext, Task> next)
     {
         var hubName = context.Hub.GetType().Name;
 
-        var transport = context.Context.Features.Get<IHttpTransportFeature>();
-        HubLogger.LogOnConnected(_logger, hubName, transport?.TransportType ?? HttpTransportType.None);
+        using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnConnectedAsync));
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnConnectedAsync));
 
-        return next(context);
+        try
+        {
+            var transport = context.Context.Features.Get<IHttpTransportFeature>();
+            HubLogger.LogOnConnected(_logger, hubName, transport?.TransportType ?? HttpTransportType.None);
+
+            var stopwatch = ValueStopwatch.StartNew();
+
+            await next(context);
+
+            var duration = stopwatch.GetElapsedTime();
+
+            HubLogger.LogHubMethodInvocationDuration(_logger, duration.TotalMilliseconds);
+            HubActivitySource.StopInvocationActivityOk(activity);
+        }
+        catch (Exception exception)
+        {
+            HubActivitySource.StopInvocationActivityError(activity, exception);
+            throw;
+        }
     }
 
-    public Task OnDisconnectedAsync(
+    public async Task OnDisconnectedAsync(
         HubLifetimeContext context,
         Exception? exception,
         Func<HubLifetimeContext, Exception?, Task> next)
     {
         var hubName = context.Hub.GetType().Name;
 
-        if (exception is null)
-        {
-            HubLogger.LogOnDisconnected(_logger, hubName);
-        }
-        else
-        {
-            HubLogger.LogOnDisconnectedWithError(_logger, hubName, exception);
-        }
+        using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnDisconnectedAsync));
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnDisconnectedAsync));
 
-        return next(context, exception);
+        try
+        {
+            if (exception is null)
+            {
+                HubLogger.LogOnDisconnected(_logger, hubName);
+            }
+            else
+            {
+                HubLogger.LogOnDisconnectedWithError(_logger, hubName, exception);
+            }
+
+            var stopwatch = ValueStopwatch.StartNew();
+
+            await next(context, exception);
+
+            var duration = stopwatch.GetElapsedTime();
+
+            HubLogger.LogHubMethodInvocationDuration(_logger, duration.TotalMilliseconds);
+            HubActivitySource.StopInvocationActivityOk(activity);
+        }
+        catch (Exception ex)
+        {
+            HubActivitySource.StopInvocationActivityError(activity, ex);
+            throw;
+        }
     }
 }
