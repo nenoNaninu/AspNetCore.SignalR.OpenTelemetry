@@ -12,14 +12,14 @@ internal static partial class HubLogger
     [LoggerMessage(8201, LogLevel.Information, "Invoking the SignalR hub method {Hub}.{HubMethod}")]
     public static partial void LogHubMethodInvocation(ILogger logger, string hub, string hubMethod);
 
-    [LoggerMessage(8202, LogLevel.Information, "Duration: {Duration}ms")]
-    public static partial void LogHubMethodInvocationDuration(ILogger logger, double duration);
-
-    [LoggerMessage(8208, LogLevel.Information, "SignalR connection to {Hub} was disconnected")]
+    [LoggerMessage(8202, LogLevel.Information, "SignalR connection to {Hub} was disconnected")]
     public static partial void LogOnDisconnected(ILogger logger, string hub);
 
-    [LoggerMessage(8209, LogLevel.Information, "SignalR connection to {Hub} was disconnected with exception")]
+    [LoggerMessage(8203, LogLevel.Information, "SignalR connection to {Hub} was disconnected with exception")]
     public static partial void LogOnDisconnectedWithError(ILogger logger, string hub, Exception exception);
+
+    [LoggerMessage(8204, LogLevel.Information, "Duration: {Duration}ms")]
+    public static partial void LogHubMethodInvocationDuration(ILogger logger, double duration);
 
     private static readonly Func<ILogger, string, string, Guid, IDisposable?> BeginHubMethodInvocationScopeCallback
         = LoggerMessage.DefineScope<string, string, Guid>("Hub:{Hub}, HubMethod:{HubMethod}, HubInvocationId:{HubInvocationId}");
