@@ -43,8 +43,6 @@ if (app.Environment.IsDevelopment())
     app.UseSignalRHubDevelopmentUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapHub<ChatHub>("/hubs/ChatHub");
