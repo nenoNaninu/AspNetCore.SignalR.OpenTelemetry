@@ -1,4 +1,5 @@
 using AspNetCore.SignalR.OpenTelemetry;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Server.Hubs;
@@ -22,6 +23,12 @@ builder.Services.AddOpenTelemetry()
     .ConfigureResource(builder =>
     {
         builder.AddService("AspNetCore.SignalR.OpenTelemetry.Example");
+    })
+    .WithMetrics(providerBuilder =>
+    {
+        providerBuilder
+            .AddSignalRInstrumentation()
+            .AddOtlpExporter();
     })
     .WithTracing(providerBuilder =>
     {
