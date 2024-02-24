@@ -14,20 +14,35 @@ internal static class HubActivitySource
         //https://opentelemetry.io/docs/specs/semconv/rpc/rpc-spans/#span-name
         var activity = ActivitySource.CreateActivity($"{hubName}/{methodName}", ActivityKind.Internal);
 
-        activity?.SetTag("signalr.hub", hubName);
-        activity?.SetTag("signalr.method", methodName);
+        if (activity is null)
+        {
+            return null;
+        }
 
-        return activity?.Start();
+        activity.SetTag("signalr.hub", hubName);
+        activity.SetTag("signalr.method", methodName);
+
+        return activity.Start();
     }
 
     internal static void StopInvocationActivityOk(Activity? activity)
     {
-        activity?.SetTag("otel.status_code", "OK");
+        if (activity is null)
+        {
+            return;
+        }
+
+        activity.SetTag("otel.status_code", "OK");
     }
 
     internal static void StopInvocationActivityError(Activity? activity, Exception exception)
     {
-        activity?.SetTag("otel.status_code", "ERROR");
-        activity?.SetTag("signalr.hub.exception", exception.ToString());
+        if (activity is null)
+        {
+            return;
+        }
+
+        activity.SetTag("otel.status_code", "ERROR");
+        activity.SetTag("signalr.hub.exception", exception.ToString());
     }
 }
