@@ -1,5 +1,8 @@
 # AspNetCore.SignalR.OpenTelemetry
 
+[![NuGet](https://img.shields.io/nuget/v/AspNetCore.SignalR.OpenTelemetry.svg)](https://www.nuget.org/packages/AspNetCore.SignalR.OpenTelemetry)
+[![build-and-test](https://github.com/nenoNaninu/AspNetCore.SignalR.OpenTelemetry/actions/workflows/build-and-test.yaml/badge.svg?branch=main)](https://github.com/nenoNaninu/AspNetCore.SignalR.OpenTelemetry/actions/workflows/build-and-test.yaml)
+
 This is an [Instrumentation Library](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/glossary.md#instrumentation-library), which instruments ASP.NET Core SignalR and collect metrics and traces about SignalR hub method invocations. 
 
 ## Table of Contents
