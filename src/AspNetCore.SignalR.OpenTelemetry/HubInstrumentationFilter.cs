@@ -23,9 +23,10 @@ public sealed class HubInstrumentationFilter : IHubFilter
     {
         var hubName = invocationContext.Hub.GetType().Name;
         var methodName = invocationContext.HubMethodName;
+        var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, methodName);
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName);
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName, address);
 
         try
         {
@@ -52,9 +53,10 @@ public sealed class HubInstrumentationFilter : IHubFilter
     public async Task OnConnectedAsync(HubLifetimeContext context, Func<HubLifetimeContext, Task> next)
     {
         var hubName = context.Hub.GetType().Name;
+        var address = context.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnConnectedAsync));
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnConnectedAsync));
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnConnectedAsync), address);
 
         try
         {
@@ -83,9 +85,10 @@ public sealed class HubInstrumentationFilter : IHubFilter
         Func<HubLifetimeContext, Exception?, Task> next)
     {
         var hubName = context.Hub.GetType().Name;
+        var address = context.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnDisconnectedAsync));
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnDisconnectedAsync));
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnDisconnectedAsync), address);
 
         try
         {
