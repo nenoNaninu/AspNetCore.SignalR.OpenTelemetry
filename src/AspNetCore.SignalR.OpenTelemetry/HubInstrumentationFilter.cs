@@ -11,10 +11,12 @@ namespace AspNetCore.SignalR.OpenTelemetry;
 public sealed class HubInstrumentationFilter : IHubFilter
 {
     private readonly ILogger _logger;
+    private readonly IHubMetrics _hubMetrics;
 
-    public HubInstrumentationFilter(ILoggerFactory loggerFactory)
+    public HubInstrumentationFilter(ILoggerFactory loggerFactory, IHubMetrics hubMetrics)
     {
         _logger = loggerFactory.CreateLogger("AspNetCore.SignalR.Logging.HubLoggingFilter");
+        _hubMetrics = hubMetrics;
     }
 
     public async ValueTask<object?> InvokeMethodAsync(
@@ -36,10 +38,12 @@ public sealed class HubInstrumentationFilter : IHubFilter
 
             var result = await next(invocationContext);
 
-            var duration = stopwatch.GetElapsedTime();
+            var duration = stopwatch.GetElapsedTime().TotalMilliseconds;
 
-            HubLogger.LogHubMethodInvocationDuration(_logger, duration.TotalMilliseconds);
+            HubLogger.LogHubMethodInvocationDuration(_logger, duration);
             HubActivitySource.StopInvocationActivityOk(activity);
+
+            _hubMetrics.CountInvocation(duration);
 
             return result;
         }
@@ -71,6 +75,8 @@ public sealed class HubInstrumentationFilter : IHubFilter
 
             HubLogger.LogHubMethodInvocationDuration(_logger, duration.TotalMilliseconds);
             HubActivitySource.StopInvocationActivityOk(activity);
+
+            _hubMetrics.CountOnConnected();
         }
         catch (Exception exception)
         {
@@ -109,6 +115,8 @@ public sealed class HubInstrumentationFilter : IHubFilter
 
             HubLogger.LogHubMethodInvocationDuration(_logger, duration.TotalMilliseconds);
             HubActivitySource.StopInvocationActivityOk(activity);
+
+            _hubMetrics.CountOnDisconnected();
         }
         catch (Exception ex)
         {
