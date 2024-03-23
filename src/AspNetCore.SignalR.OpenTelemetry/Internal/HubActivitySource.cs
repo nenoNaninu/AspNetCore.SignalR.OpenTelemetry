@@ -14,7 +14,10 @@ internal static class HubActivitySource
         // https://opentelemetry.io/docs/specs/semconv/rpc/rpc-spans/#span-name
         var activity = ActivitySource.CreateActivity($"{hubName}/{methodName}", ActivityKind.Server);
 
-        if (activity is null)
+        // Activity.IsAllDataRequested is same as TelemetrySpan.IsRecording in OpenTelemetry API.
+        // https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.7.0/src/OpenTelemetry.Api/Trace/TelemetrySpan.cs#L35-L36
+        // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampling
+        if (activity is null || activity.IsAllDataRequested == false)
         {
             return null;
         }
@@ -34,7 +37,7 @@ internal static class HubActivitySource
 
     internal static void StopInvocationActivityOk(Activity? activity)
     {
-        if (activity is null)
+        if (activity is null || activity.IsAllDataRequested == false)
         {
             return;
         }
@@ -44,7 +47,7 @@ internal static class HubActivitySource
 
     internal static void StopInvocationActivityError(Activity? activity, Exception exception)
     {
-        if (activity is null)
+        if (activity is null || activity.IsAllDataRequested == false)
         {
             return;
         }
