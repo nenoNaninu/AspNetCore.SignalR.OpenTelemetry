@@ -16,7 +16,7 @@ internal static class HubActivitySource
 
         // Activity.IsAllDataRequested is same as TelemetrySpan.IsRecording in OpenTelemetry API.
         // https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.7.0/src/OpenTelemetry.Api/Trace/TelemetrySpan.cs#L35-L36
-        // https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/sdk.md#sampling
+        // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.31.0/specification/trace/sdk.md#sampling
         if (activity is null || activity.IsAllDataRequested == false)
         {
             return null;
