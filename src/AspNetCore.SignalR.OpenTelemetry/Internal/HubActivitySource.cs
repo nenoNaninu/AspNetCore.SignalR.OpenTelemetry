@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace AspNetCore.SignalR.OpenTelemetry.Internal;
 
@@ -7,7 +8,7 @@ internal static class HubActivitySource
 {
     internal const string Name = "AspNetCore.SignalR.OpenTelemetry";
 
-    private static readonly ActivitySource ActivitySource = new(Name);
+    private static readonly ActivitySource ActivitySource = new(Name, typeof(HubActivitySource).Assembly.GetPackageVersion());
 
     internal static Activity? StartInvocationActivity(string hubName, string methodName, string? address)
     {
@@ -42,6 +43,7 @@ internal static class HubActivitySource
             return;
         }
 
+        // https://opentelemetry.io/docs/specs/otel/common/mapping-to-non-otlp/#span-status
         activity.SetTag("otel.status_code", "OK");
     }
 
@@ -54,5 +56,13 @@ internal static class HubActivitySource
 
         activity.SetTag("otel.status_code", "ERROR");
         activity.SetTag("signalr.hub.exception", exception.ToString());
+    }
+}
+
+file static class AssemblyExtensions
+{
+    public static string GetPackageVersion(this Assembly assembly)
+    {
+        return assembly.GetName().Version?.ToString() ?? string.Empty;
     }
 }
