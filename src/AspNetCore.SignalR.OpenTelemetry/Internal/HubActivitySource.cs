@@ -43,7 +43,7 @@ internal static class HubActivitySource
             return;
         }
 
-        // https://opentelemetry.io/docs/specs/otel/common/mapping-to-non-otlp/#span-status
+        // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.32.0/specification/common/mapping-to-non-otlp.md#span-status
         activity.SetTag("otel.status_code", "OK");
     }
 
