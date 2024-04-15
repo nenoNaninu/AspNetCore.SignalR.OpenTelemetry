@@ -5,7 +5,7 @@ namespace AspNetCore.SignalR.OpenTelemetry.Internal;
 
 internal static class HubActivitySource
 {
-    internal const string Name = "SignalR.Hub";
+    internal const string Name = "AspNetCore.SignalR.OpenTelemetry";
 
     private static readonly ActivitySource ActivitySource = new(Name);
 
