@@ -8,7 +8,7 @@
         <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
         <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
         <PackageVersion Include="TypedSignalR.Client.DevTools" Version="1.2.4" />
-        <PackageVersion Include="OpenTelemetry.Api" Version="1.8.0" />
+        <PackageVersion Include="OpenTelemetry.Api" Version="1.8.1" />
         <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.8.0" />
         <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.8.0" />
         <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.8.1" />
