@@ -10,6 +10,7 @@ This is an [Instrumentation Library](https://github.com/open-telemetry/opentelem
 - [Install](#install)
 - [Usage](#usage)
 - [Example](#example)
+- [Related Work](#related-work)
 
 ## Install
 
@@ -69,3 +70,12 @@ $ docker compose up
 In Grafana, you can see the SignalR method call trace as follows.
 
 ![Trace](https://github.com/nenoNaninu/AspNetCore.SignalR.OpenTelemetry/assets/27144255/eac66809-56f4-49e9-b09e-d2379805f795)
+
+## Related Work
+
+- [nenoNaninu/TypedSignalR.Client](https://github.com/nenoNaninu/TypedSignalR.Client)
+  - C# Source Generator to create strongly typed SignalR clients.
+- [nenoNaninu/TypedSignalR.Client.TypeScript](https://github.com/nenoNaninu/TypedSignalR.Client.TypeScript)
+  - TypeScript source generator to provide strongly typed SignalR clients by analyzing C# type definitions.
+- [nenoNaninu/TypedSignalR.Client.DevTools](https://github.com/nenoNaninu/TypedSignalR.Client.DevTools)
+  - SignalR development tools inspired by SwaggerUI.
