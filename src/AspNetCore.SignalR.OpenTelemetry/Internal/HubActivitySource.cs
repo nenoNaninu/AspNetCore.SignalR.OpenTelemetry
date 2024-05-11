@@ -55,7 +55,11 @@ internal static class HubActivitySource
         }
 
         activity.SetTag("otel.status_code", "ERROR");
-        activity.SetTag("signalr.hub.exception", exception.ToString());
+
+        // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/exceptions/exceptions-spans.md#attributes
+        activity.SetTag("exception.message", exception.Message);
+        activity.SetTag("exception.stacktrace", exception.StackTrace);
+        activity.SetTag("exception.type", exception.GetType().FullName);
     }
 }
 
