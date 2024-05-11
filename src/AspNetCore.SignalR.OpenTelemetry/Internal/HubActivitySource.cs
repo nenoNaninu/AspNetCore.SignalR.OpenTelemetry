@@ -12,7 +12,7 @@ internal static class HubActivitySource
 
     internal static Activity? StartInvocationActivity(string hubName, string methodName, string? address)
     {
-        // https://github.com/open-telemetry/semantic-conventions/blob/v1.24.0/docs/rpc/rpc-spans.md#span-name
+        // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/rpc/rpc-spans.md#span-name
         var activity = ActivitySource.CreateActivity($"{hubName}/{methodName}", ActivityKind.Server);
 
         // Activity.IsAllDataRequested is same as TelemetrySpan.IsRecording in OpenTelemetry API.
@@ -23,7 +23,7 @@ internal static class HubActivitySource
             return null;
         }
 
-        // https://github.com/open-telemetry/semantic-conventions/blob/v1.24.0/docs/rpc/rpc-spans.md#common-attributes
+        // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/rpc/rpc-spans.md#common-attributes
         activity.SetTag("rpc.system", "signalr");
         activity.SetTag("rpc.service", hubName);
         activity.SetTag("rpc.method", methodName);
@@ -55,7 +55,11 @@ internal static class HubActivitySource
         }
 
         activity.SetTag("otel.status_code", "ERROR");
-        activity.SetTag("signalr.hub.exception", exception.ToString());
+
+        // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/exceptions/exceptions-spans.md#attributes
+        activity.SetTag("exception.message", exception.Message);
+        activity.SetTag("exception.stacktrace", exception.StackTrace);
+        activity.SetTag("exception.type", exception.GetType().FullName);
     }
 }
 
