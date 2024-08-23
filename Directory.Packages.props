@@ -6,7 +6,7 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageVersion Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.20.1" />
-        <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+        <PackageVersion Include="Swashbuckle.AspNetCore" Version="6.7.1" />
         <PackageVersion Include="TypedSignalR.Client.DevTools" Version="1.2.4" />
         <PackageVersion Include="OpenTelemetry.Api" Version="1.9.0" />
         <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
