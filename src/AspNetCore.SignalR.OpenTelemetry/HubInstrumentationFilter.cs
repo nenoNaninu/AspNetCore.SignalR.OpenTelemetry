@@ -1,20 +1,24 @@
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using AspNetCore.SignalR.OpenTelemetry.Internal;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Connections.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace AspNetCore.SignalR.OpenTelemetry;
 
 public sealed class HubInstrumentationFilter : IHubFilter
 {
     private readonly ILogger _logger;
+    private readonly HubInstrumentationOptions _options;
 
-    public HubInstrumentationFilter(ILoggerFactory loggerFactory)
+    public HubInstrumentationFilter(ILoggerFactory loggerFactory, IOptions<HubInstrumentationOptions> options)
     {
         _logger = loggerFactory.CreateLogger("AspNetCore.SignalR.Logging.HubLoggingFilter");
+        _options = options.Value;
     }
 
     public async ValueTask<object?> InvokeMethodAsync(
@@ -46,6 +50,9 @@ public sealed class HubInstrumentationFilter : IHubFilter
         catch (Exception exception)
         {
             HubActivitySource.StopInvocationActivityError(activity, exception);
+
+            InvokeOptionExceptionHandler(activity, exception);
+
             throw;
         }
     }
@@ -75,6 +82,9 @@ public sealed class HubInstrumentationFilter : IHubFilter
         catch (Exception exception)
         {
             HubActivitySource.StopInvocationActivityError(activity, exception);
+
+            InvokeOptionExceptionHandler(activity, exception);
+
             throw;
         }
     }
@@ -113,7 +123,18 @@ public sealed class HubInstrumentationFilter : IHubFilter
         catch (Exception ex)
         {
             HubActivitySource.StopInvocationActivityError(activity, ex);
+
+            InvokeOptionExceptionHandler(activity, ex);
+
             throw;
+        }
+    }
+
+    private void InvokeOptionExceptionHandler(Activity? activity, Exception exception)
+    {
+        if (_options.OnException is not null && activity is not null && activity.IsAllDataRequested)
+        {
+            _options.OnException(activity, exception);
         }
     }
 }
