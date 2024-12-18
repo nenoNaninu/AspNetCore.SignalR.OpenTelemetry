@@ -9,7 +9,7 @@ internal static partial class HubLogger
     [LoggerMessage(8200, LogLevel.Information, "SignalR connection established to {Hub} over {TransportType}")]
     public static partial void LogOnConnected(ILogger logger, string hub, HttpTransportType transportType);
 
-    [LoggerMessage(8201, LogLevel.Information, "Invoking the SignalR hub method {Hub}.{HubMethod}")]
+    [LoggerMessage(8201, LogLevel.Information, "SignalR hub method invocation: {Hub}.{HubMethod}")]
     public static partial void LogHubMethodInvocation(ILogger logger, string hub, string hubMethod);
 
     [LoggerMessage(8202, LogLevel.Information, "SignalR connection to {Hub} was disconnected")]
