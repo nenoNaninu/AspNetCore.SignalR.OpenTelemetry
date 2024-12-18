@@ -9,6 +9,7 @@ This is an [Instrumentation Library](https://github.com/open-telemetry/opentelem
 
 - [Install](#install)
 - [Usage](#usage)
+  - [Exception Handling](#exception-handling)
 - [Example](#example)
 - [Related Work](#related-work)
 
@@ -39,6 +40,27 @@ builder.Services.AddOpenTelemetry()
             .AddAspNetCoreInstrumentation()
             .AddSignalRInstrumentation() // <- Add this!
             .AddOtlpExporter();
+    });
+```
+
+### Exception Handling
+
+By setting the `OnException` option, you can override the attributes that this library writes by default. 
+For example, when an exception occurs inside your SignalR hub method, this library sets the `otel.status_code` attribute to `ERROR`. 
+However, there are cases where you do not want a specific exception to be `ERROR`.
+In that case, you can override the default attribute by setting it as follows.
+
+```cs
+builder.Services.AddSignalR()
+    .AddHubInstrumentation(options =>
+    {
+        options.OnException = static (activity, exception) =>
+        {
+            if (exception is HubException)
+            {
+                activity.SetTag("otel.status_code", "OK");
+            }
+        };
     });
 ```
 
