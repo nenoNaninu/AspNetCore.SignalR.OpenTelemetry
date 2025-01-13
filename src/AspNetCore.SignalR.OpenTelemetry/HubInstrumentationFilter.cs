@@ -1,12 +1,12 @@
 using System;
+using Microsoft.AspNetCore.Http.Connections.Features;
+using Microsoft.AspNetCore.Http.Connections;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Options;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using AspNetCore.SignalR.OpenTelemetry.Internal;
-using Microsoft.AspNetCore.Http.Connections;
-using Microsoft.AspNetCore.Http.Connections.Features;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace AspNetCore.SignalR.OpenTelemetry;
 
@@ -24,25 +24,35 @@ public sealed class HubInstrumentationFilter : IHubFilter
     public async ValueTask<object?> InvokeMethodAsync(
         HubInvocationContext invocationContext,
         Func<HubInvocationContext, ValueTask<object?>> next)
-    {
+    {        
+        if (ShouldSkipCreateActivity(invocationContext))
+        {
+            return await next(invocationContext);
+        }
+        
         var hubName = invocationContext.Hub.GetType().Name;
         var methodName = invocationContext.HubMethodName;
-        var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
+        var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;            
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, methodName);
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName, address);
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName, address, _options.UnsetParentActivity);
+
+        InvokeEnrichWithRequestHandler(activity, invocationContext);
 
         try
         {
             HubLogger.LogHubMethodInvocation(_logger, hubName, methodName);
 
-            var stopwatch = ValueStopwatch.StartNew();
+            var stopwatch = Internal.ValueStopwatch.StartNew();
 
             var result = await next(invocationContext);
 
             var duration = stopwatch.GetElapsedTime();
 
             HubLogger.LogHubMethodInvocationDuration(_logger, duration.TotalMilliseconds);
+
+            InvokeEnrichWithResponseHandler(activity, result);
+
             HubActivitySource.StopInvocationActivityOk(activity);
 
             return result;
@@ -51,7 +61,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
         {
             HubActivitySource.StopInvocationActivityError(activity, exception);
 
-            InvokeOptionExceptionHandler(activity, exception);
+            InvokeEnrichWithExceptionHandler(activity, exception);
 
             throw;
         }
@@ -63,14 +73,14 @@ public sealed class HubInstrumentationFilter : IHubFilter
         var address = context.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnConnectedAsync));
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnConnectedAsync), address);
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnConnectedAsync), address, _options.UnsetParentActivity);
 
         try
         {
             var transport = context.Context.Features.Get<IHttpTransportFeature>();
             HubLogger.LogOnConnected(_logger, hubName, transport?.TransportType ?? HttpTransportType.None);
 
-            var stopwatch = ValueStopwatch.StartNew();
+            var stopwatch = Internal.ValueStopwatch.StartNew();
 
             await next(context);
 
@@ -83,7 +93,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
         {
             HubActivitySource.StopInvocationActivityError(activity, exception);
 
-            InvokeOptionExceptionHandler(activity, exception);
+            this.InvokeEnrichWithExceptionHandler(activity, exception);
 
             throw;
         }
@@ -98,7 +108,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
         var address = context.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnDisconnectedAsync));
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnDisconnectedAsync), address);
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnDisconnectedAsync), address, _options.UnsetParentActivity);
 
         try
         {
@@ -111,7 +121,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
                 HubLogger.LogOnDisconnectedWithError(_logger, hubName, exception);
             }
 
-            var stopwatch = ValueStopwatch.StartNew();
+            var stopwatch = Internal.ValueStopwatch.StartNew();
 
             await next(context, exception);
 
@@ -124,17 +134,75 @@ public sealed class HubInstrumentationFilter : IHubFilter
         {
             HubActivitySource.StopInvocationActivityError(activity, ex);
 
-            InvokeOptionExceptionHandler(activity, ex);
+            this.InvokeEnrichWithExceptionHandler(activity, ex);
 
             throw;
         }
     }
 
-    private void InvokeOptionExceptionHandler(Activity? activity, Exception exception)
+    private void InvokeEnrichWithExceptionHandler(Activity? activity, Exception exception)
     {
-        if (_options.OnException is not null && activity is not null && activity.IsAllDataRequested)
+        var handler = _options.EnrichWithException;
+        if (handler is not null && activity is not null && activity.IsAllDataRequested)
         {
-            _options.OnException(activity, exception);
+            try
+            {
+                handler(activity, exception);
+            }
+            catch (Exception ex)
+            {
+                HubLogger.EnrichWithExceptionError(_logger, ex);
+            }
         }
+    }
+    
+    private void InvokeEnrichWithRequestHandler(Activity? activity, HubInvocationContext invocationContext)
+    {
+        var handler = _options.EnrichWithRequest;
+        if (handler is not null && activity is not null && activity.IsAllDataRequested)
+        {
+            try
+            {
+                handler(activity, invocationContext);
+            }
+            catch (Exception ex)
+            {
+                HubLogger.EnrichWithRequestError(_logger, ex);
+            }
+        }
+    }
+    
+    private void InvokeEnrichWithResponseHandler(Activity? activity, object? result)
+    {
+        var handler = _options.EnrichWithResponse;
+        if (handler is not null && activity is not null && activity.IsAllDataRequested)
+        {
+            try
+            {
+                handler(activity, result);
+            }
+            catch (Exception ex)
+            {
+                HubLogger.EnrichWithResponseError(_logger, ex);
+            }
+        }
+    }
+
+    private bool ShouldSkipCreateActivity(HubInvocationContext invocationContext)
+    {
+        try
+        {
+            if (_options.Filter?.Invoke(invocationContext) == false)
+            {
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            HubLogger.FilterHandlerError(_logger, ex);
+            return true;
+        }
+
+        return false;
     }
 }

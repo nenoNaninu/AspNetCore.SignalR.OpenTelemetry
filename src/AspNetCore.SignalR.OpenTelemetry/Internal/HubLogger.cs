@@ -20,7 +20,19 @@ internal static partial class HubLogger
 
     [LoggerMessage(8204, LogLevel.Information, "Duration: {Duration}ms")]
     public static partial void LogHubMethodInvocationDuration(ILogger logger, double duration);
+    
+    [LoggerMessage(8205, LogLevel.Error, "Enriching activity with request details threw an error")]
+    public static partial void EnrichWithRequestError(ILogger logger, Exception ex);
 
+    [LoggerMessage(8206, LogLevel.Error, "Enriching activity with response details threw an error")]
+    public static partial void EnrichWithResponseError(ILogger logger, Exception ex);
+    
+    [LoggerMessage(8207, LogLevel.Error, "Enriching activity with exception details threw an error")]
+    public static partial void EnrichWithExceptionError(ILogger logger, Exception ex);
+    
+    [LoggerMessage(8208, LogLevel.Error, "Activity filter handler threw an error")]
+    public static partial void FilterHandlerError(ILogger logger, Exception ex);
+    
     private static readonly Func<ILogger, string, string, Guid, IDisposable?> BeginHubMethodInvocationScopeCallback
         = LoggerMessage.DefineScope<string, string, Guid>("Hub:{Hub}, HubMethod:{HubMethod}, HubInvocationId:{HubInvocationId}");
 

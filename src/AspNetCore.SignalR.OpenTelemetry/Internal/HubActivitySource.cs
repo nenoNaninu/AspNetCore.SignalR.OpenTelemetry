@@ -8,59 +8,69 @@ internal static class HubActivitySource
 {
     internal const string Name = "AspNetCore.SignalR.OpenTelemetry";
 
-    private static readonly ActivitySource ActivitySource = new(Name, typeof(HubActivitySource).Assembly.GetPackageVersion());
+        private static readonly ActivitySource ActivitySource = new(Name, typeof(HubActivitySource).Assembly.GetPackageVersion());
 
-    internal static Activity? StartInvocationActivity(string hubName, string methodName, string? address)
-    {
-        // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/rpc/rpc-spans.md#span-name
-        var activity = ActivitySource.CreateActivity($"{hubName}/{methodName}", ActivityKind.Server);
-
-        // Activity.IsAllDataRequested is same as TelemetrySpan.IsRecording in OpenTelemetry API.
-        // https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.7.0/src/OpenTelemetry.Api/Trace/TelemetrySpan.cs#L35-L36
-        // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.31.0/specification/trace/sdk.md#sampling
-        if (activity is null || activity.IsAllDataRequested == false)
+        internal static Activity? StartInvocationActivity(string hubName, string methodName, string? address, bool unsetParentActivity = true)
         {
-            return null;
+            if (unsetParentActivity)
+            {
+                // https://github.com/dotnet/aspnetcore/blob/9cbc884137b0caeca36e702669d73f2e1ec184cd/src/SignalR/server/Core/src/Internal/DefaultHubDispatcher.cs#L407
+                // https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/server/Core/src/HubConnectionContext.cs#L62
+                
+                // by default, this would connect everything under the ComponentHub/OnConnectedAsync span
+                // which may not be ideal when the connection is long-lived
+                Activity.Current = null;
+            }
+
+            // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/rpc/rpc-spans.md#span-name
+            var activity = ActivitySource.CreateActivity($"{hubName}/{methodName}", ActivityKind.Server);
+
+            // Activity.IsAllDataRequested is same as TelemetrySpan.IsRecording in OpenTelemetry API.
+            // https://github.com/open-telemetry/opentelemetry-dotnet/blob/core-1.7.0/src/OpenTelemetry.Api/Trace/TelemetrySpan.cs#L35-L36
+            // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.31.0/specification/trace/sdk.md#sampling
+            if (activity is null || activity.IsAllDataRequested == false)
+            {
+                return null;
+            }
+
+            // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/rpc/rpc-spans.md#common-attributes
+            activity.SetTag("rpc.system", "signalr");
+            activity.SetTag("rpc.service", hubName);
+            activity.SetTag("rpc.method", methodName);
+
+            if (!string.IsNullOrEmpty(address))
+            {
+                activity.SetTag("server.address", address);
+            }
+
+            return activity.Start();
         }
 
-        // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/rpc/rpc-spans.md#common-attributes
-        activity.SetTag("rpc.system", "signalr");
-        activity.SetTag("rpc.service", hubName);
-        activity.SetTag("rpc.method", methodName);
-
-        if (!string.IsNullOrEmpty(address))
+        internal static void StopInvocationActivityOk(Activity? activity)
         {
-            activity.SetTag("server.address", address);
+            if (activity is null || activity.IsAllDataRequested == false)
+            {
+                return;
+            }
+
+            // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.32.0/specification/common/mapping-to-non-otlp.md#span-status
+            activity.SetTag("otel.status_code", "OK");
         }
 
-        return activity.Start();
-    }
-
-    internal static void StopInvocationActivityOk(Activity? activity)
-    {
-        if (activity is null || activity.IsAllDataRequested == false)
+        internal static void StopInvocationActivityError(Activity? activity, Exception exception)
         {
-            return;
+            if (activity is null || activity.IsAllDataRequested == false)
+            {
+                return;
+            }
+
+            activity.SetTag("otel.status_code", "ERROR");
+
+            // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/exceptions/exceptions-spans.md#attributes
+            activity.SetTag("exception.message", exception.Message);
+            activity.SetTag("exception.stacktrace", exception.StackTrace);
+            activity.SetTag("exception.type", exception.GetType().FullName);
         }
-
-        // https://github.com/open-telemetry/opentelemetry-specification/blob/v1.32.0/specification/common/mapping-to-non-otlp.md#span-status
-        activity.SetTag("otel.status_code", "OK");
-    }
-
-    internal static void StopInvocationActivityError(Activity? activity, Exception exception)
-    {
-        if (activity is null || activity.IsAllDataRequested == false)
-        {
-            return;
-        }
-
-        activity.SetTag("otel.status_code", "ERROR");
-
-        // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/exceptions/exceptions-spans.md#attributes
-        activity.SetTag("exception.message", exception.Message);
-        activity.SetTag("exception.stacktrace", exception.StackTrace);
-        activity.SetTag("exception.type", exception.GetType().FullName);
-    }
 }
 
 file static class AssemblyExtensions
