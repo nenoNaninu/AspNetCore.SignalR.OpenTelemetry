@@ -30,6 +30,13 @@ public sealed class HubInstrumentationFilter : IHubFilter
             return await next(invocationContext);
         }
 
+        var previousActivity = Activity.Current;
+
+        if (!_options.UseCurrentTraceContext)
+        {
+            Activity.Current = null;
+        }
+
         var hubName = invocationContext.Hub.GetType().Name;
         var methodName = invocationContext.HubMethodName;
         var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
@@ -59,6 +66,13 @@ public sealed class HubInstrumentationFilter : IHubFilter
             InvokeOptionExceptionHandler(activity, exception);
 
             throw;
+        }
+        finally
+        {
+            if (!_options.UseCurrentTraceContext)
+            {
+                Activity.Current = previousActivity;
+            }
         }
     }
 
