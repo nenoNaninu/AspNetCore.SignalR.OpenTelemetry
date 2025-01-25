@@ -79,6 +79,13 @@ public sealed class HubInstrumentationFilter : IHubFilter
 
     public async Task OnConnectedAsync(HubLifetimeContext context, Func<HubLifetimeContext, Task> next)
     {
+        var previousActivity = Activity.Current;
+
+        if (!_options.UseCurrentTraceContext)
+        {
+            Activity.Current = null;
+        }
+
         var hubName = context.Hub.GetType().Name;
         var connectionId = context.Context.ConnectionId;
         var address = context.Context.GetHttpContext()?.Request.Host.Value;
@@ -108,6 +115,13 @@ public sealed class HubInstrumentationFilter : IHubFilter
 
             throw;
         }
+        finally
+        {
+            if (!_options.UseCurrentTraceContext)
+            {
+                Activity.Current = previousActivity;
+            }
+        }
     }
 
     public async Task OnDisconnectedAsync(
@@ -115,6 +129,13 @@ public sealed class HubInstrumentationFilter : IHubFilter
         Exception? exception,
         Func<HubLifetimeContext, Exception?, Task> next)
     {
+        var previousActivity = Activity.Current;
+
+        if (!_options.UseCurrentTraceContext)
+        {
+            Activity.Current = null;
+        }
+
         var hubName = context.Hub.GetType().Name;
         var connectionId = context.Context.ConnectionId;
         var address = context.Context.GetHttpContext()?.Request.Host.Value;
@@ -149,6 +170,13 @@ public sealed class HubInstrumentationFilter : IHubFilter
             InvokeOptionExceptionHandler(activity, ex);
 
             throw;
+        }
+        finally
+        {
+            if (!_options.UseCurrentTraceContext)
+            {
+                Activity.Current = previousActivity;
+            }
         }
     }
 
