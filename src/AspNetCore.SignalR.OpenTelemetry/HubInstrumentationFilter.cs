@@ -39,8 +39,8 @@ public sealed class HubInstrumentationFilter : IHubFilter
 
         var hubName = invocationContext.Hub.GetType().Name;
         var methodName = invocationContext.HubMethodName;
-        var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
         var connectionId = invocationContext.Context.ConnectionId;
+        var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, methodName);
         using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName, connectionId, address);
