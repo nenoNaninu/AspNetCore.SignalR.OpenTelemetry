@@ -10,7 +10,7 @@ internal static class HubActivitySource
 
     private static readonly ActivitySource ActivitySource = new(Name, typeof(HubActivitySource).Assembly.GetPackageVersion());
 
-    internal static Activity? StartInvocationActivity(string hubName, string methodName, string? address)
+    internal static Activity? StartInvocationActivity(string hubName, string methodName, string connectionId, string? address)
     {
         // https://github.com/open-telemetry/semantic-conventions/blob/v1.25.0/docs/rpc/rpc-spans.md#span-name
         var activity = ActivitySource.CreateActivity($"{hubName}/{methodName}", ActivityKind.Server);
@@ -27,6 +27,8 @@ internal static class HubActivitySource
         activity.SetTag("rpc.system", "signalr");
         activity.SetTag("rpc.service", hubName);
         activity.SetTag("rpc.method", methodName);
+
+        activity.SetTag("signalr.connection.id", connectionId);
 
         if (!string.IsNullOrEmpty(address))
         {

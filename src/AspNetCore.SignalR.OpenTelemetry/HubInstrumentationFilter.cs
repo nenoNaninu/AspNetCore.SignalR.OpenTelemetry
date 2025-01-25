@@ -40,9 +40,10 @@ public sealed class HubInstrumentationFilter : IHubFilter
         var hubName = invocationContext.Hub.GetType().Name;
         var methodName = invocationContext.HubMethodName;
         var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
+        var connectionId = invocationContext.Context.ConnectionId;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, methodName);
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName, address);
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName, connectionId, address);
 
         try
         {
@@ -79,10 +80,11 @@ public sealed class HubInstrumentationFilter : IHubFilter
     public async Task OnConnectedAsync(HubLifetimeContext context, Func<HubLifetimeContext, Task> next)
     {
         var hubName = context.Hub.GetType().Name;
+        var connectionId = context.Context.ConnectionId;
         var address = context.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnConnectedAsync));
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnConnectedAsync), address);
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnConnectedAsync), connectionId, address);
 
         try
         {
@@ -114,10 +116,11 @@ public sealed class HubInstrumentationFilter : IHubFilter
         Func<HubLifetimeContext, Exception?, Task> next)
     {
         var hubName = context.Hub.GetType().Name;
+        var connectionId = context.Context.ConnectionId;
         var address = context.Context.GetHttpContext()?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, nameof(OnDisconnectedAsync));
-        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnDisconnectedAsync), address);
+        using var activity = HubActivitySource.StartInvocationActivity(hubName, nameof(OnDisconnectedAsync), connectionId, address);
 
         try
         {
