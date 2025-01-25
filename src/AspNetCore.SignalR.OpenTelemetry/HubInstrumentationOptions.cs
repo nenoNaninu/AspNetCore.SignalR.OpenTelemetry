@@ -25,4 +25,6 @@ public sealed class HubInstrumentationOptions
     /// </list>
     /// </remarks>
     public Func<HubInvocationContext, bool>? Filter { get; set; }
+
+    public bool UseCurrentTraceContext { get; set; }
 }
