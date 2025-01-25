@@ -25,6 +25,11 @@ public sealed class HubInstrumentationFilter : IHubFilter
         HubInvocationContext invocationContext,
         Func<HubInvocationContext, ValueTask<object?>> next)
     {
+        if (_options.Filter?.Invoke(invocationContext) == false)
+        {
+            return await next(invocationContext);
+        }
+
         var hubName = invocationContext.Hub.GetType().Name;
         var methodName = invocationContext.HubMethodName;
         var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
