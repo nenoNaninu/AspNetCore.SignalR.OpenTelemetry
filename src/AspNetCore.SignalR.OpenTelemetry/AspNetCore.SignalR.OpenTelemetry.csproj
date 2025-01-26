@@ -26,4 +26,8 @@
         <FrameworkReference Include="Microsoft.AspNetCore.App" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="AspNetCore.SignalR.OpenTelemetry.Tests" />
+    </ItemGroup>
+
 </Project>
