@@ -65,7 +65,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async void TestUseCurrentTraceContext()
+    public async void TestUseParentTraceContext()
     {
         // Arrange
         var exportedItems = new List<Activity>();
@@ -73,7 +73,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         using var factory = _factory
             .ConfiguredFactory(options =>
             {
-                options.UseCurrentTraceContext = true;
+                options.UseParentTraceContext = true;
             }, exportedItems);
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
