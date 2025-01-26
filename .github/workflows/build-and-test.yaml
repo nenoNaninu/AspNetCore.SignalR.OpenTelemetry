@@ -26,3 +26,6 @@ jobs:
 
       - name: Build AspNetCore.SignalR.OpenTelemetry.csproj
         run: dotnet build ./src/AspNetCore.SignalR.OpenTelemetry/AspNetCore.SignalR.OpenTelemetry.csproj --no-restore
+
+      - name: Test AspNetCore.SignalR.OpenTelemetry.Tests.csproj
+        run: dotnet test ./tests/AspNetCore.SignalR.OpenTelemetry.Tests/AspNetCore.SignalR.OpenTelemetry.Tests.csproj --no-restore
