@@ -3,6 +3,7 @@ using AspNetCore.SignalR.OpenTelemetry.Internal;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -190,6 +191,50 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         {
             Assert.Contains(activity.Tags, x => x.Key == "signalr.connection.id" && x.Value == connectionId);
         }
+    }
+
+    [Fact]
+    public async void TestOnException()
+    {
+        // Arrange
+        var exportedItems = new List<Activity>();
+
+        HubException? exception = null;
+
+        using var factory = _factory
+            .ConfiguredFactory(options =>
+            {
+                options.OnException = (activity, ex) =>
+                {
+                    if (ex is HubException hubException)
+                    {
+                        exception = hubException;
+                    }
+                };
+            }, exportedItems);
+
+        await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
+        {
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+
+            // Act
+            try
+            {
+                await connection.StartAsync();
+
+                await hubProxy.ThrowHubException(1, 1);
+
+                await connection.StopAsync();
+            }
+            catch
+            {
+                // eat exception
+            }
+        }
+
+        // Assert
+        Assert.NotNull(exception);
+        Assert.Equal("ThrowHubException", exception.Message);
     }
 }
 
