@@ -131,7 +131,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
     {
         var previousActivity = Activity.Current;
 
-        if (!_options.UseParentTraceContext)
+        if (previousActivity is not null && !_options.UseParentTraceContext)
         {
             Activity.Current = null;
         }
@@ -173,7 +173,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
         }
         finally
         {
-            if (!_options.UseParentTraceContext)
+            if (previousActivity is not null && !_options.UseParentTraceContext)
             {
                 Activity.Current = previousActivity;
             }
