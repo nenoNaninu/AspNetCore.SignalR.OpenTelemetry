@@ -10,6 +10,7 @@ This is an [Instrumentation Library](https://github.com/open-telemetry/opentelem
 - [Install](#install)
 - [Usage](#usage)
   - [Exception Handling](#exception-handling)
+  - [Filter](#filter)
 - [Example](#example)
 - [Related Work](#related-work)
 
@@ -63,6 +64,24 @@ builder.Services.AddSignalR()
         };
     });
 ```
+
+### Filter
+
+If you want to capture traces of specific methods or don't want to capture traces of a specific method, use the `Filter` option.
+`Filter` function that determines whether or not to collect telemetry on a per invocation basis.
+
+```cs
+builder.Services.AddSignalR()
+    .AddHubInstrumentation(options =>
+    {
+        // same as LINQ's Where method
+        options.Filter = context =>
+        {
+            return context.HubMethodName != "MethodNameOfNotCaptureTraces";
+        };
+    });
+```
+
 
 ## Example
 
