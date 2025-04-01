@@ -22,7 +22,7 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore dependencies
-        run: dotnet restore ./AspNetCore.SignalR.OpenTelemetry.sln
+        run: dotnet restore ./AspNetCore.SignalR.OpenTelemetry.slnx
 
       - name: Build AspNetCore.SignalR.OpenTelemetry.csproj
         run: dotnet build ./src/AspNetCore.SignalR.OpenTelemetry/AspNetCore.SignalR.OpenTelemetry.csproj --no-restore
