@@ -24,7 +24,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async void TestDefault()
+    public async Task TestDefault()
     {
         // Arrange
         var exportedItems = new List<Activity>();
@@ -66,7 +66,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async void TestUseParentTraceContext()
+    public async Task TestUseParentTraceContext()
     {
         // Arrange
         var exportedItems = new List<Activity>();
@@ -112,7 +112,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async void TestFilter()
+    public async Task TestFilter()
     {
         // Arrange
         var exportedItems = new List<Activity>();
@@ -148,7 +148,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async void TestAttribute()
+    public async Task TestAttribute()
     {
         // Arrange
         var exportedItems = new List<Activity>();
@@ -194,7 +194,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
     }
 
     [Fact]
-    public async void TestOnException()
+    public async Task TestOnException()
     {
         // Arrange
         var exportedItems = new List<Activity>();
