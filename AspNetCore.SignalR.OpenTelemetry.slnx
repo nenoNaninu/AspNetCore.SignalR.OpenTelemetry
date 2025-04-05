@@ -1,0 +1,18 @@
+<Solution>
+  <Folder Name="/examples/">
+    <Project Path="examples/Server/Server.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/AspNetCore.SignalR.OpenTelemetry/AspNetCore.SignalR.OpenTelemetry.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AspNetCore.SignalR.OpenTelemetry.Tests/AspNetCore.SignalR.OpenTelemetry.Tests.csproj" />
+    <Project Path="tests/TestApp.AspNetCore/TestApp.AspNetCore.csproj" />
+  </Folder>
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>
