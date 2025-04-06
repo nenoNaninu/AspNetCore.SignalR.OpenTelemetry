@@ -26,5 +26,11 @@ public sealed class HubInstrumentationOptions
     /// </remarks>
     public Func<HubInvocationContext, bool>? Filter { get; set; }
 
+    public Action<Activity, HubInvocationContext>? EnrichOnMethodInvoked { get; set; }
+
+    public Action<Activity, HubLifetimeContext>? EnrichOnConnected { get; set; }
+
+    public Action<Activity, HubLifetimeContext>? EnrichOnDisconnected { get; set; }
+
     public bool UseParentTraceContext { get; set; }
 }
