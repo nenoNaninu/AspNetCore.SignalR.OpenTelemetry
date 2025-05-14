@@ -11,6 +11,7 @@ This is an [Instrumentation Library](https://github.com/open-telemetry/opentelem
 - [Usage](#usage)
   - [Exception Handling](#exception-handling)
   - [Filter](#filter)
+  - [Enrich](#enrich)
 - [Example](#example)
 - [Related Work](#related-work)
 
@@ -78,6 +79,32 @@ builder.Services.AddSignalR()
         options.Filter = context =>
         {
             return context.HubMethodName != "MethodNameOfNotCaptureTraces";
+        };
+    });
+```
+
+### Enrich
+
+This instrumentation library provides `EnrichOnMethodInvoked` and `EnrichOnConnected` and `EnrichOnDisconnected` options that can be used to enrich the activity with additional information from the raw `HubInvocationContext` and `HubLifetimeContext` objects respectively.
+
+```cs
+builder.Services.AddSignalR()
+    .AddHubInstrumentation(options =>
+    {
+        options.EnrichOnMethodInvoked = (activity, context) =>
+        {
+            var ctx = context.ServiceProvider.GetRequiredService<IMyContext>();
+            activity.AddTag("key", ctx.Value);
+        };
+
+        options.EnrichOnConnected = (activity, context) =>
+        {
+            activity.AddTag("key", "value");
+        };
+
+        options.EnrichOnDisconnected = (activity, context) =>
+        {
+            activity.AddTag("key", "value");
         };
     });
 ```
