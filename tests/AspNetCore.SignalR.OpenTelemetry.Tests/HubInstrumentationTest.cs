@@ -34,14 +34,14 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
-            await connection.StartAsync();
+            await connection.StartAsync(TestContext.Current.CancellationToken);
 
             var result = await hubProxy.Add(1, 1);
 
-            await connection.StopAsync();
+            await connection.StopAsync(TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Equal(2, result);
@@ -79,14 +79,14 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
-            await connection.StartAsync();
+            await connection.StartAsync(TestContext.Current.CancellationToken);
 
             var result = await hubProxy.Add(1, 1);
 
-            await connection.StopAsync();
+            await connection.StopAsync(TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Equal(2, result);
@@ -125,14 +125,14 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
-            await connection.StartAsync();
+            await connection.StartAsync(TestContext.Current.CancellationToken);
 
             var result = await hubProxy.Add(1, 1);
 
-            await connection.StopAsync();
+            await connection.StopAsync(TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Equal(2, result);
@@ -170,15 +170,15 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
 
-            await connection.StartAsync();
+            await connection.StartAsync(TestContext.Current.CancellationToken);
 
             var result = await hubProxy.Add(1, 1);
 
-            await connection.StopAsync();
+            await connection.StopAsync(TestContext.Current.CancellationToken);
 
             // Assert
             Assert.Equal(2, result);
@@ -215,16 +215,16 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
             try
             {
-                await connection.StartAsync();
+                await connection.StartAsync(TestContext.Current.CancellationToken);
 
                 await hubProxy.ThrowHubException(1, 1);
 
-                await connection.StopAsync();
+                await connection.StopAsync(TestContext.Current.CancellationToken);
             }
             catch
             {
@@ -254,16 +254,16 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
             try
             {
-                await connection.StartAsync();
+                await connection.StartAsync(TestContext.Current.CancellationToken);
 
                 var result = await hubProxy.Add(1, 1);
 
-                await connection.StopAsync();
+                await connection.StopAsync(TestContext.Current.CancellationToken);
             }
             catch
             {
@@ -298,16 +298,16 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
             try
             {
-                await connection.StartAsync();
+                await connection.StartAsync(TestContext.Current.CancellationToken);
 
                 var result = await hubProxy.Add(1, 1);
 
-                await connection.StopAsync();
+                await connection.StopAsync(TestContext.Current.CancellationToken);
             }
             catch
             {
@@ -342,16 +342,16 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
-            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>(TestContext.Current.CancellationToken);
 
             // Act
             try
             {
-                await connection.StartAsync();
+                await connection.StartAsync(TestContext.Current.CancellationToken);
 
                 var result = await hubProxy.Add(1, 1);
 
-                await connection.StopAsync();
+                await connection.StopAsync(TestContext.Current.CancellationToken);
             }
             catch
             {
