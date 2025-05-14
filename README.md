@@ -93,8 +93,12 @@ builder.Services.AddSignalR()
     {
         options.EnrichOnMethodInvoked = (activity, context) =>
         {
-            var ctx = context.ServiceProvider.GetRequiredService<IMyContext>();
-            activity.AddTag("key", ctx.Value);
+            var ctx = context.ServiceProvider.GetRequiredService<IMyContextAccessor>().Context;
+
+            if(ctx is not null)
+            {
+                activity.AddTag("key", ctx.Value);
+            }
         };
 
         options.EnrichOnConnected = (activity, context) =>
