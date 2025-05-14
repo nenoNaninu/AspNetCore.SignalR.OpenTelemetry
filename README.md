@@ -85,7 +85,7 @@ builder.Services.AddSignalR()
 
 ### Enrich
 
-This instrumentation library provides `EnrichOnMethodInvoked` and `EnrichOnConnected` and `EnrichOnDisconnected` options that can be used to enrich the activity with additional information from the raw `HubInvocationContext` and `HubLifetimeContext` objects respectively.
+This instrumentation library provides `EnrichOnMethodInvoked`, `EnrichOnConnected` and `EnrichOnDisconnected` options that can be used to enrich the activity with additional information from the raw `HubInvocationContext` and `HubLifetimeContext` objects respectively.
 
 ```cs
 builder.Services.AddSignalR()
