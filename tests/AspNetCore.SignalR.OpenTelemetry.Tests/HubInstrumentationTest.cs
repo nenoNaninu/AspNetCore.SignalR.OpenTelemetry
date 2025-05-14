@@ -30,7 +30,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         var exportedItems = new List<Activity>();
 
         using var factory = _factory
-            .ConfiguredFactory(options => { }, exportedItems);
+            .ConfigureFactory(options => { }, exportedItems);
 
         await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
         {
@@ -72,7 +72,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         var exportedItems = new List<Activity>();
 
         using var factory = _factory
-            .ConfiguredFactory(options =>
+            .ConfigureFactory(options =>
             {
                 options.UseParentTraceContext = true;
             }, exportedItems);
@@ -118,7 +118,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         var exportedItems = new List<Activity>();
 
         using var factory = _factory
-            .ConfiguredFactory(options =>
+            .ConfigureFactory(options =>
             {
                 options.Filter = context => !string.Equals(context.HubMethodName, "Add", StringComparison.OrdinalIgnoreCase);
             }, exportedItems);
@@ -156,7 +156,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         string? connectionId = null;
 
         using var factory = _factory
-            .ConfiguredFactory(options =>
+            .ConfigureFactory(options =>
             {
                 options.Filter = context =>
                 {
@@ -202,7 +202,7 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         HubException? exception = null;
 
         using var factory = _factory
-            .ConfiguredFactory(options =>
+            .ConfigureFactory(options =>
             {
                 options.OnException = (activity, ex) =>
                 {
@@ -236,11 +236,143 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
         Assert.NotNull(exception);
         Assert.Equal("ThrowHubException", exception.Message);
     }
+
+    [Fact]
+    public async Task TestEnrichOnConnected()
+    {
+        // Arrange
+        var exportedItems = new List<Activity>();
+
+        using var factory = _factory
+            .ConfigureFactory(options =>
+            {
+                options.EnrichOnConnected = (activity, context) =>
+                {
+                    activity.AddTag("EnrichOnConnectedKey", "EnrichOnConnectedValue");
+                };
+            }, exportedItems);
+
+        await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
+        {
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+
+            // Act
+            try
+            {
+                await connection.StartAsync();
+
+                var result = await hubProxy.Add(1, 1);
+
+                await connection.StopAsync();
+            }
+            catch
+            {
+                // eat exception
+            }
+        }
+
+        // Assert
+
+        Assert.True(SpinWait.SpinUntil(() => exportedItems.Count >= 4, TimeSpan.FromSeconds(1)));
+
+        Assert.Contains(exportedItems,
+            x => x.Source.Name == HubActivitySource.Name
+                && x.Tags.Any(x => x.Key == "EnrichOnConnectedKey" && x.Value == "EnrichOnConnectedValue")
+        );
+    }
+
+    [Fact]
+    public async Task TestEnrichOnDisconnected()
+    {
+        // Arrange
+        var exportedItems = new List<Activity>();
+
+        using var factory = _factory
+            .ConfigureFactory(options =>
+            {
+                options.EnrichOnDisconnected = (activity, context) =>
+                {
+                    activity.AddTag("EnrichOnDisconnectedKey", "EnrichOnDisconnectedValue");
+                };
+            }, exportedItems);
+
+        await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
+        {
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+
+            // Act
+            try
+            {
+                await connection.StartAsync();
+
+                var result = await hubProxy.Add(1, 1);
+
+                await connection.StopAsync();
+            }
+            catch
+            {
+                // eat exception
+            }
+        }
+
+        // Assert
+
+        Assert.True(SpinWait.SpinUntil(() => exportedItems.Count >= 4, TimeSpan.FromSeconds(1)));
+
+        Assert.Contains(exportedItems,
+            x => x.Source.Name == HubActivitySource.Name
+                && x.Tags.Any(x => x.Key == "EnrichOnDisconnectedKey" && x.Value == "EnrichOnDisconnectedValue")
+        );
+    }
+
+    [Fact]
+    public async Task TestEnrichOnMethodInvoked()
+    {
+        // Arrange
+        var exportedItems = new List<Activity>();
+
+        using var factory = _factory
+            .ConfigureFactory(options =>
+            {
+                options.EnrichOnMethodInvoked = (activity, context) =>
+                {
+                    activity.AddTag($"{context.HubMethodName}Key", $"{context.HubMethodName}Value");
+                };
+            }, exportedItems);
+
+        await using (var connection = factory.CreateHubConnection("/hubs/unaryhub"))
+        {
+            var hubProxy = connection.CreateHubProxy<IUnaryHub>();
+
+            // Act
+            try
+            {
+                await connection.StartAsync();
+
+                var result = await hubProxy.Add(1, 1);
+
+                await connection.StopAsync();
+            }
+            catch
+            {
+                // eat exception
+            }
+        }
+
+        // Assert
+
+        Assert.True(SpinWait.SpinUntil(() => exportedItems.Count >= 4, TimeSpan.FromSeconds(1)));
+
+        Assert.Contains(exportedItems,
+            x => x.Source.Name == HubActivitySource.Name
+                && x.Tags.Any(x => x.Key == "AddKey" && x.Value == "AddValue")
+        );
+    }
 }
 
 file static class Extensions
 {
-    public static WebApplicationFactory<Program> ConfiguredFactory(
+    public static WebApplicationFactory<Program> ConfigureFactory(
         this WebApplicationFactory<Program> factory,
         Action<HubInstrumentationOptions> configure,
         ICollection<Activity> exportedItems)
@@ -278,7 +410,7 @@ file static class Extensions
 
         var uri = new Uri(options.BaseAddress, path);
 
-        var websocket = factory.Server.CreateWebSocketClient();
+        var webSocket = factory.Server.CreateWebSocketClient();
 
         var connection = new HubConnectionBuilder()
             .WithUrl(uri, options =>
@@ -287,7 +419,7 @@ file static class Extensions
                 options.SkipNegotiation = true;
                 options.WebSocketFactory = async (context, cancellationToken) =>
                 {
-                    var client = await websocket.ConnectAsync(context.Uri, cancellationToken);
+                    var client = await webSocket.ConnectAsync(context.Uri, cancellationToken);
                     return client;
                 };
             })
