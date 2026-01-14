@@ -17,7 +17,7 @@ services:
     image: mcr.microsoft.com/dotnet/aspire-dashboard:9.0
     ports:
       - "18888:18888"  # Dashboard UI
-      - "4317:4317"    # OTLP gRPC endpoint (mapped from internal port 18889)
+      - "4317:4317"    # OTLP gRPC endpoint
     environment:
       - DOTNET_DASHBOARD_UNSECURED_ALLOW_ANONYMOUS=true
-      - DOTNET_DASHBOARD_OTLP_ENDPOINT_URL=http://+:4317
+      - DOTNET_DASHBOARD_OTLP_ENDPOINT_URL=http://0.0.0.0:4317
