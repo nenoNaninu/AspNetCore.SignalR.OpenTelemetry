@@ -399,7 +399,7 @@ file static class Extensions
                         .WithTracing(builder =>
                         {
                             builder
-                                .AddAspNetCoreInstrumentation(options => options.EnableAspNetCoreSignalRSupport = false)
+                                .AddAspNetCoreInstrumentation()
                                 .AddSignalRInstrumentation()
                                 .AddInMemoryExporter(exportedItems);
                         });
