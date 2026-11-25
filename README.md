@@ -120,28 +120,21 @@ The example code architecture is as follows.
 
 ```mermaid
 graph LR;
-    app[ASP.NET Core Server] --> otelc[OpenTelemetry Collector];
-    otelc --> Tempo;
-    Grafana --> Tempo;
+    app[ASP.NET Core Server] -- OTLP --> dashboard[Aspire Dashboard];
 ```
 
-The example code can be quickly executed from Visual Studio.
-
-![Docker](https://github.com/nenoNaninu/AspNetCore.SignalR.OpenTelemetry/assets/27144255/f03797a8-1d85-48ce-b5df-2da5ea9c2039)
-
-It can also be quickly executed from the CLI.
+The example code uses [Aspire](https://aspire.dev) and can be quickly executed from the CLI.
 
 ```
-$ docker compose build
-$ docker compose up
+$ dotnet run --project ./examples/AppHost/AppHost.csproj
 ```
 
-- App Server: http://localhost:8080/signalr-dev/index.html
-- Grafana: http://localhost:3000/explore
+The Aspire Dashboard URL, including the login token, is printed to the console.
+You can also run the example by setting the AppHost project as the startup project in Visual Studio or Rider.
 
-In Grafana, you can see the SignalR method call trace as follows.
+- App Server: http://localhost:5212/signalr-dev/index.html
 
-![Trace](https://github.com/nenoNaninu/AspNetCore.SignalR.OpenTelemetry/assets/27144255/eac66809-56f4-49e9-b09e-d2379805f795)
+In the Aspire Dashboard, you can see the SignalR method call trace on the Traces page.
 
 ## Related Work
 
