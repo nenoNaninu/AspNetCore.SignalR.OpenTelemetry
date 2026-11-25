@@ -103,12 +103,15 @@ public class HubInstrumentationTest : IClassFixture<WebApplicationFactory<Progra
 
         Assert.NotNull(websocketActivity);
 
-        var signalrActivities = exportedItems.Where(x => x.Source.Name != "Microsoft.AspNetCore");
+        var onConnectedActivity = Assert.Single(exportedItems, x => x.DisplayName == "UnaryHub/OnConnectedAsync");
+        var addActivity = Assert.Single(exportedItems, x => x.DisplayName == "UnaryHub/Add");
+        var onDisconnectedActivity = Assert.Single(exportedItems, x => x.DisplayName == "UnaryHub/OnDisconnectedAsync");
 
-        foreach (var activity in signalrActivities)
-        {
-            Assert.Equal(websocketActivity.TraceId, activity.TraceId);
-        }
+        Assert.Equal(websocketActivity.TraceId, onConnectedActivity.TraceId);
+        Assert.Equal(websocketActivity.TraceId, onDisconnectedActivity.TraceId);
+
+        // Since .NET 9, SignalR clears Activity.Current before it invokes a hub method.
+        Assert.NotEqual(websocketActivity.TraceId, addActivity.TraceId);
     }
 
     [Fact]
@@ -396,7 +399,7 @@ file static class Extensions
                         .WithTracing(builder =>
                         {
                             builder
-                                .AddAspNetCoreInstrumentation()
+                                .AddAspNetCoreInstrumentation(options => options.EnableAspNetCoreSignalRSupport = false)
                                 .AddSignalRInstrumentation()
                                 .AddInMemoryExporter(exportedItems);
                         });
