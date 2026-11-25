@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/examples/">
+    <Project Path="examples/AppHost/AppHost.csproj" />
     <Project Path="examples/Server/Server.csproj" />
   </Folder>
   <Folder Name="/Solution Items/">
@@ -12,7 +13,4 @@
     <Project Path="tests/AspNetCore.SignalR.OpenTelemetry.Tests/AspNetCore.SignalR.OpenTelemetry.Tests.csproj" />
     <Project Path="tests/TestApp.AspNetCore/TestApp.AspNetCore.csproj" />
   </Folder>
-  <Project Path="docker-compose.dcproj">
-    <Build />
-  </Project>
 </Solution>
