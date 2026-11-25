@@ -1,0 +1,10 @@
+<Project>
+    <PropertyGroup>
+        <Nullable>enable</Nullable>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
+</Project>
