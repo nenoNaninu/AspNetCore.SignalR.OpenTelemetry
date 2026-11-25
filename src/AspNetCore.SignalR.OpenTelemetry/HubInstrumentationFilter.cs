@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AspNetCore.SignalR.OpenTelemetry.Internal;
 using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Http.Connections.Features;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -32,16 +33,17 @@ public sealed class HubInstrumentationFilter : IHubFilter
         }
 
         var previousActivity = Activity.Current;
+        var httpContext = invocationContext.Context.GetHttpContext();
 
-        if (!_options.UseParentTraceContext)
-        {
-            Activity.Current = null;
-        }
+        // Since .NET 9, SignalR clears Activity.Current before invoking a hub method.
+        Activity.Current = _options.UseParentTraceContext
+            ? previousActivity ?? httpContext?.Features.Get<IHttpActivityFeature>()?.Activity
+            : null;
 
         var hubName = invocationContext.Hub.GetType().Name;
         var methodName = invocationContext.HubMethodName;
         var connectionId = invocationContext.Context.ConnectionId;
-        var address = invocationContext.Context.GetHttpContext()?.Request.Host.Value;
+        var address = httpContext?.Request.Host.Value;
 
         using var scope = HubLogger.BeginHubMethodInvocationScope(_logger, hubName, methodName);
         using var activity = HubActivitySource.StartInvocationActivity(hubName, methodName, connectionId, address);
@@ -73,10 +75,7 @@ public sealed class HubInstrumentationFilter : IHubFilter
         }
         finally
         {
-            if (!_options.UseParentTraceContext)
-            {
-                Activity.Current = previousActivity;
-            }
+            Activity.Current = previousActivity;
         }
     }
 
